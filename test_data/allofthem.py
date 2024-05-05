@@ -11,5 +11,5 @@ with open(os.path.join(mydir, "allofthem.txt"), "r", encoding="utf-8") as all_da
     allvapor = map(lambda x: x.encode("ascii"), all_dat_l)
 
 for i, vapor in enumerate(allvapor):
-    with vapor_generator.new_vaporizer.decompress(io.BytesIO(vapor)) as im:
+    with vapor_generator.new_vaporizer.decompress(vapor) as im:
         im.save(os.path.join(mydir, f"allofthem/{i}.png"))

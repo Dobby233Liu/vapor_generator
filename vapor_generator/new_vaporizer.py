@@ -91,11 +91,15 @@ def _decompress(data: io.BytesIO):
             char = data.read(1)
         yield line
 
-def decompress(data: io.BytesIO):
+def decompress(data: bytes|io.BytesIO):
+    if isinstance(data, bytes):
+        data = io.BytesIO(data)
     result_pixels = list(_decompress(data))
+
     width = max(len(line) for line in result_pixels)
     height = len(result_pixels)
     assert width > 0 and height > 0
+
     result = PIL.Image.new("1", (width, height), 0)
     result.putdata(tuple(itertools.chain(*result_pixels)))
     return result
