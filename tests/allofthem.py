@@ -4,6 +4,7 @@ import io
 import PIL.ImageChops
 import difflib
 import shutil
+import sys
 
 mydir = os.path.dirname(os.path.realpath(__file__))
 
@@ -16,17 +17,19 @@ with open(os.path.join(mydir, "allofthem.txt"), "r", encoding="utf-8") as all_da
 shutil.rmtree(os.path.join(mydir, "allofthem"), ignore_errors=True)
 os.mkdir(os.path.join(mydir, "allofthem"))
 
+optimize = len(sys.argv) > 1
+
 for i, vapor in enumerate(allvapor):
     with open(os.path.join(mydir, f"allofthem/{i}.bin"), "wb") as f:
         f.write(vapor)
     with vaporizer.decompress(vapor) as im:
         im.save(os.path.join(mydir, f"allofthem/{i}.png"))
-        recom = vaporizer.compress(im) + b'~~'
+        recom = vaporizer.compress(im, optimize=optimize) + (not optimize and b'~~' or b'')
         if recom == vapor:
             continue
         print(f"{i} is not the same")
         #print([li for li in difflib.ndiff(vapor.decode("utf-8"), recom.decode("utf-8")) if not li.startswith(" ")])
-        #print(len(vapor), len(recom))
+        print(len(vapor), len(recom))
         with open(os.path.join(mydir, f"allofthem/{i}_r.bin"), "wb") as f:
             f.write(recom)
         with vaporizer.decompress(recom) as imx:
