@@ -17,6 +17,7 @@ def make_code_seq(start: bytes, size: int, max_size: int):
         ret += bytes([start[0] + i])
     return ret
 
+
 BLACK_START = b'U'
 BLACK_MAX_SIZE = 36
 def make_black_code(size: int):
@@ -43,7 +44,7 @@ def _compress(im: PIL.Image.Image):
     for line in range(_im.height):
         block_type = None
         block_width = 0
-        def write_block():
+        def make_block():
             nonlocal block_type
             match block_type:
                 case _DustBlockType.Black:
@@ -57,12 +58,12 @@ def _compress(im: PIL.Image.Image):
             if block_type is None:
                 block_type = this_block_type
             if block_type != this_block_type:
-                if block := write_block():
+                if block := make_block():
                     yield block
                 block_type = this_block_type
                 block_width = 0
             block_width += 1
-        if block := write_block():
+        if block := make_block():
             yield block
 
         yield TERMINATE_LINE
@@ -77,18 +78,20 @@ def compress(im: PIL.Image.Image):
 
 
 def _decompress(data: io.BytesIO):
-    while (char := data.read(1)) != TERMINATE_DATA:
-        line = []
-        while char != TERMINATE_LINE:
-            if char >= BLACK_START and char <= BLACK_END:
-                for _ in range(char[0] - BLACK_START[0]):
-                    line.append(0)
-            elif char >= WHITE_START and char <= WHITE_END:
-                for _ in range(char[0] - WHITE_START[0]):
-                    line.append(1)
-            else:
-                raise ValueError("Invalid character")
-            char = data.read(1)
+    line = []
+    while (char := data.read(1)) and char != TERMINATE_DATA:
+        if char >= BLACK_START and char <= BLACK_END:
+            for _ in range(char[0] - BLACK_START[0]):
+                line.append(0)
+        elif char >= WHITE_START and char <= WHITE_END:
+            for _ in range(char[0] - WHITE_START[0]):
+                line.append(1)
+        elif char == TERMINATE_LINE:
+            yield line
+            line = []
+        else:
+            raise ValueError("Invalid character")
+    if len(line) > 0:
         yield line
 
 def decompress(data: bytes|io.BytesIO):
