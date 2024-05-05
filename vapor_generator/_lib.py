@@ -30,7 +30,7 @@ WHITE_END = make_white_code(WHITE_MAX_SIZE)[0]
 TERMINATE_LINE = b'}'
 TERMINATE_DATA = b'~'
 
-class _DustBlockType(enum.IntEnum):
+class _DustParticleType(enum.IntEnum):
     Black = 0
     White = 1
 
@@ -39,36 +39,38 @@ def _compress(im: PIL.Image.Image, optimize=False):
     assert im.mode == "1"
 
     for line in range(im.height):
-        block_type = None
-        block_width = 0
-        def make_block():
-            nonlocal block_type
-            match block_type:
-                case _DustBlockType.Black:
-                    return make_black_code(block_width)
-                case _DustBlockType.White:
-                    return make_white_code(block_width)
+        part_type = None
+        part_width = 0
+
+        def make_part():
+            nonlocal part_type
+            match part_type:
+                case _DustParticleType.Black:
+                    return make_black_code(part_width)
+                case _DustParticleType.White:
+                    return make_white_code(part_width)
                 case _:
                     assert False
 
         for x in range(im.width):
-            this_block_type = im.getpixel((x, line))
-            assert this_block_type in _DustBlockType
-            if block_type is None:
-                block_type = this_block_type
-            elif block_type != this_block_type:
-                if block := make_block():
-                    yield block
-                block_type = this_block_type
-                block_width = 0
-            block_width += 1
+            part_type_here = im.getpixel((x, line))
+            assert part_type_here in _DustParticleType
 
-        assert block_type != None
-        # drop final block if its black; that's going to be skipped by vanilla
-        # vaporizer anyway
-        if not optimize or block_type != _DustBlockType.Black:
-            if block := make_block():
-                yield block
+            if part_type is None:
+                part_type = part_type_here
+            elif part_type != part_type_here:
+                if part := make_part():
+                    yield part
+                part_type = part_type_here
+                part_width = 0
+            part_width += 1
+
+        assert part_type != None
+        # drop the last particle if its black; that's gonna be skipped by the
+        # vanilla vaporizer anyway
+        if not optimize or part_type != _DustParticleType.Black:
+            if part := make_part():
+                yield part
 
         yield TERMINATE_LINE
 
