@@ -50,7 +50,7 @@ In fact, we seem to generate smaller - more "efficiently compressed" - data!
 `test_data/allofthem.py` is an accuracy test, you can get a glimpse of this compressor's accuracy
 by running that.
 
-Feel free raise an Issue if this gets problematic for you.
+Feel free to raise an Issue if this gets problematic for you.
 
 ## License
 [MIT License](LICENSE)
