@@ -1,6 +1,7 @@
 import enum
 import PIL.Image, PIL.ImageOps
 import itertools
+import io
 
 
 def chunk_generator(size: int, max_size: int):
@@ -71,25 +72,23 @@ def generate(im: PIL.Image.Image):
     return result
 
 
-def _parse_line(line):
-    for char in line:
-        if char >= BLACK_START[0] and char <= BLACK_END[0]:
-            for _ in range(char - BLACK_START[0]):
-                yield 0
-        elif char >= WHITE_START[0] and char <= WHITE_END[0]:
-            for _ in range(char - WHITE_START[0]):
-                yield 1
-        else:
-            raise ValueError("Invalid character")
+def _parse_pixels(data: io.BytesIO):
+    while (char := data.read(1)) != TERMINATE_DATA:
+        def gen_line():
+            nonlocal char
+            while char != TERMINATE_LINE:
+                if char >= BLACK_START and char <= BLACK_END:
+                    for _ in range(char[0] - BLACK_START[0]):
+                        yield 0
+                elif char >= WHITE_START and char <= WHITE_END:
+                    for _ in range(char[0] - WHITE_START[0]):
+                        yield 1
+                else:
+                    raise ValueError("Invalid character")
+                char = data.read(1)
+        yield tuple(gen_line())
 
-def _parse_pixels(data: bytes):
-    lines = data.split(TERMINATE_LINE)
-    for line in lines:
-        if line.endswith(TERMINATE_DATA):
-            break
-        yield tuple(_parse_line(line))
-
-def parse(data: bytes):
+def parse(data: io.BytesIO):
     result_pixels = list(_parse_pixels(data))
     width = max(len(line) for line in result_pixels)
     height = len(result_pixels)

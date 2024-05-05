@@ -1,6 +1,6 @@
 import argparse
 import PIL.Image
-import new_vaporizer
+from . import new_vaporizer
 
 def generate(args):
     with PIL.Image.open(args.input) as im:
