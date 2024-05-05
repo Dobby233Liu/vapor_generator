@@ -30,9 +30,9 @@ WHITE_END = make_white_code(WHITE_MAX_SIZE)[0]
 TERMINATE_LINE = b'}'
 TERMINATE_DATA = b'~'
 
-class _DustBlockType(enum.Enum):
-    Black = enum.auto()
-    White = enum.auto()
+class _DustBlockType(enum.IntEnum):
+    Black = 0
+    White = 1
 
 
 def _compress(im: PIL.Image.Image, optimize=False):
@@ -48,10 +48,12 @@ def _compress(im: PIL.Image.Image, optimize=False):
                     return make_black_code(block_width)
                 case _DustBlockType.White:
                     return make_white_code(block_width)
+                case _:
+                    assert False
 
         for x in range(im.width):
-            pixel = im.getpixel((x, line))
-            this_block_type = _DustBlockType.Black if pixel == 0 else _DustBlockType.White
+            this_block_type = im.getpixel((x, line))
+            assert this_block_type in _DustBlockType
             if block_type is None:
                 block_type = this_block_type
             elif block_type != this_block_type:
@@ -60,8 +62,10 @@ def _compress(im: PIL.Image.Image, optimize=False):
                 block_type = this_block_type
                 block_width = 0
             block_width += 1
+
         assert block_type != None
-        # skip final block if its black, which is going to be skipped anyway
+        # drop final block if its black; that's going to be skipped by vanilla
+        # vaporizer anyway
         if not optimize or block_type != _DustBlockType.Black:
             if block := make_block():
                 yield block
