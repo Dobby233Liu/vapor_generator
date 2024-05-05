@@ -1,5 +1,3 @@
-data = mydata
-
 var scale = 2
 
 // draw undusted part
