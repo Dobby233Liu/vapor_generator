@@ -38,7 +38,8 @@ options:
 ```
 
 ## Accuracy
-This compressor might emit data that is slightly different than whichever compressor Toby came up with (error margin wildly varies),
+This compressor might emit data that is slightly different than whichever compressor Toby came up with
+(error margin wildly varies),
 but if you manually replace `~` at the end with `~~~`, it usually should be close enough to be
 indistinguishable from the original data.
 
