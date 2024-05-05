@@ -160,5 +160,4 @@ cython_debug/
 #.idea/
 
 .vscode/
-# not now
-test_data/
+test_data/allofthem/
