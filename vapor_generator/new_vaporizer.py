@@ -37,21 +37,19 @@ class _DustBlockType(enum.Enum):
     White = enum.auto()
 
 
-def compress(im: PIL.Image.Image):
+def _compress(im: PIL.Image.Image):
     _im = im.convert("1")
-
-    result = b''
 
     for line in range(_im.height):
         block_type = None
         block_width = 0
         def write_block():
-            nonlocal result, block_type
+            nonlocal block_type
             match block_type:
                 case _DustBlockType.Black:
-                    result += make_black_code(block_width)
+                    return make_black_code(block_width)
                 case _DustBlockType.White:
-                    result += make_white_code(block_width)
+                    return make_white_code(block_width)
 
         for x in range(_im.width):
             pixel = _im.getpixel((x, line))
@@ -59,20 +57,26 @@ def compress(im: PIL.Image.Image):
             if block_type is None:
                 block_type = this_block_type
             if block_type != this_block_type:
-                write_block()
+                if block := write_block():
+                    yield block
                 block_type = this_block_type
                 block_width = 0
             block_width += 1
-        write_block()
+        if block := write_block():
+            yield block
 
-        result += TERMINATE_LINE
+        yield TERMINATE_LINE
 
-    result += TERMINATE_DATA
+    yield TERMINATE_DATA
 
-    return result
+def compress(im: PIL.Image.Image):
+    data_io = io.BytesIO()
+    for chunk in _compress(im):
+        data_io.write(chunk)
+    return data_io.getvalue()
 
 
-def _decompress_pixels(data: io.BytesIO):
+def _decompress(data: io.BytesIO):
     while (char := data.read(1)) != TERMINATE_DATA:
         line = []
         while char != TERMINATE_LINE:
@@ -88,9 +92,10 @@ def _decompress_pixels(data: io.BytesIO):
         yield line
 
 def decompress(data: io.BytesIO):
-    result_pixels = list(_decompress_pixels(data))
+    result_pixels = list(_decompress(data))
     width = max(len(line) for line in result_pixels)
     height = len(result_pixels)
+    assert width > 0 and height > 0
     result = PIL.Image.new("1", (width, height), 0)
     result.putdata(tuple(itertools.chain(*result_pixels)))
     return result
