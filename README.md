@@ -1,22 +1,23 @@
 # vapor_generator
-A compressor and decompressor for the basic ASCII-based RLE in Undertale's obj_vaporized_new. I know I didn't say it's that in the tool itself, I realized it after I had wrote the dumb CLI.
+(De)compressor for the basic ASCII-based RLE used by Undertale's obj_vaporized_new. I know I didn't say it's that in the tool itself, I realized it after I had wrote the dumb CLI.
 
 ## Usage
 ```
-usage: python -m vapor_generator [-h] {generate,parse} ...
+usage: python -m vapor_generator [-h] {compress,decompress} ...
 
-Tool for dealing with vapor data for Undertale's obj_vaporized_new.
+(De)compressor for the basic ASCII-based RLE used by Undertale's obj_vaporized_new.
 
 positional arguments:
-  {generate,parse}  Commands
-    generate        Generate a new vapor data file.
-    parse           Create an image from a vapor data file.
+  {compress,decompress}
+                        Commands
+    compress            Compresses an image to a vapor data file.
+    decompress          Decompresses a vapor data file to an image.
 
 options:
-  -h, --help        show this help message and exit
+  -h, --help            show this help message and exit
 ```
 ```
-usage: python -m vapor_generator generate [-h] input output
+usage: python -m vapor_generator compress [-h] input output
 
 positional arguments:
   input       The input image file
@@ -26,7 +27,7 @@ options:
   -h, --help  show this help message and exit
 ```
 ```
-usage: python -m vapor_generator parse [-h] input output
+usage: python -m vapor_generator decompress [-h] input output
 
 positional arguments:
   input       The input data file

@@ -4,30 +4,30 @@ import itertools
 import io
 
 
-def chunk_generator(size: int, max_size: int):
+def break_into_chunks(size: int, max_size: int):
     while size > max_size:
         yield max_size
         size -= max_size
     if size > 0:
         yield size
 
-def make_sequence(start: bytes, size: int, max_size: int):
+def make_code_seq(start: bytes, size: int, max_size: int):
     ret = b''
-    for i in chunk_generator(size, max_size):
+    for i in break_into_chunks(size, max_size):
         ret += bytes([start[0] + i])
     return ret
 
 BLACK_START = b'U'
 BLACK_MAX_SIZE = 36
-def make_black(size: int):
-    return make_sequence(BLACK_START, size, BLACK_MAX_SIZE)
-BLACK_END = make_black(BLACK_MAX_SIZE)
+def make_black_code(size: int):
+    return make_code_seq(BLACK_START, size, BLACK_MAX_SIZE)
+BLACK_END = make_black_code(BLACK_MAX_SIZE)
 
 WHITE_START = b'('
 WHITE_MAX_SIZE = 42
-def make_white(size: int):
-    return make_sequence(WHITE_START, size, WHITE_MAX_SIZE)
-WHITE_END = make_white(WHITE_MAX_SIZE)
+def make_white_code(size: int):
+    return make_code_seq(WHITE_START, size, WHITE_MAX_SIZE)
+WHITE_END = make_white_code(WHITE_MAX_SIZE)
 
 TERMINATE_LINE = b'}'
 TERMINATE_DATA = b'~'
@@ -37,7 +37,7 @@ class _DustBlockType(enum.Enum):
     White = enum.auto()
 
 
-def generate(im: PIL.Image.Image):
+def compress(im: PIL.Image.Image):
     _im = im.convert("1")
 
     result = b''
@@ -49,9 +49,9 @@ def generate(im: PIL.Image.Image):
             nonlocal result, block_type
             match block_type:
                 case _DustBlockType.Black:
-                    result += make_black(block_width)
+                    result += make_black_code(block_width)
                 case _DustBlockType.White:
-                    result += make_white(block_width)
+                    result += make_white_code(block_width)
 
         for x in range(_im.width):
             pixel = _im.getpixel((x, line))
@@ -72,7 +72,7 @@ def generate(im: PIL.Image.Image):
     return result
 
 
-def _parse_pixels(data: io.BytesIO):
+def _decompress_pixels(data: io.BytesIO):
     while (char := data.read(1)) != TERMINATE_DATA:
         def gen_line():
             nonlocal char
@@ -88,8 +88,8 @@ def _parse_pixels(data: io.BytesIO):
                 char = data.read(1)
         yield tuple(gen_line())
 
-def parse(data: io.BytesIO):
-    result_pixels = list(_parse_pixels(data))
+def decompress(data: io.BytesIO):
+    result_pixels = list(_decompress_pixels(data))
     width = max(len(line) for line in result_pixels)
     height = len(result_pixels)
     result = PIL.Image.new("1", (width, height), 0)
