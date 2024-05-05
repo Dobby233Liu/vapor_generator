@@ -4,7 +4,7 @@ from . import new_vaporizer
 
 def compress(args):
     with PIL.Image.open(args.input) as im:
-        args.output.write(new_vaporizer.compress(im))
+        args.output.write(new_vaporizer.compress(im, optimize=args.optimize))
 
 def decompress(args):
     with new_vaporizer.decompress(args.input) as im:
@@ -18,6 +18,7 @@ subparser = parser.add_subparsers(help="Commands", required=True)
 parser_generate = subparser.add_parser("compress", help="Compresses an image to a vapor data file.")
 parser_generate.add_argument("input", type=argparse.FileType("rb"), help="The input image file")
 parser_generate.add_argument("output", type=argparse.FileType("wb"), help="The output data file")
+parser_generate.add_argument("-O", "--optimize", action="store_true", help="Enables some tricks to reduce output size")
 parser_generate.set_defaults(func=compress)
 
 parser_parse = subparser.add_parser("decompress", help="Decompresses a vapor data file to an image.")

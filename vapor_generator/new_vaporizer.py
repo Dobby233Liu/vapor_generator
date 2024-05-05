@@ -4,9 +4,6 @@ import itertools
 import io
 
 
-AGGRESSIVE_OPTIMIZATIONS = False
-
-
 def break_into_chunks(size: int, max_size: int):
     while size > max_size:
         yield max_size
@@ -41,7 +38,7 @@ class _DustBlockType(enum.Enum):
     White = enum.auto()
 
 
-def _compress(im: PIL.Image.Image):
+def _compress(im: PIL.Image.Image, optimize=False):
     assert im.mode == "1"
 
     for line in range(im.height):
@@ -67,7 +64,7 @@ def _compress(im: PIL.Image.Image):
                 block_width = 0
             block_width += 1
         # skip final block if its going to be skipped anyway
-        if not AGGRESSIVE_OPTIMIZATIONS or block_type == _DustBlockType.White:
+        if not optimize or block_type == _DustBlockType.White:
             if block := make_block():
                 yield block
 
@@ -75,9 +72,9 @@ def _compress(im: PIL.Image.Image):
 
     yield TERMINATE_DATA
 
-def compress(im: PIL.Image.Image):
+def compress(im: PIL.Image.Image, *args, optimize=False, **kwargs):
     data_io = io.BytesIO()
-    for chunk in _compress(im.convert("1")):
+    for chunk in _compress(im.convert("1"), *args, optimize=optimize, **kwargs):
         data_io.write(chunk)
     return data_io.getvalue()
 

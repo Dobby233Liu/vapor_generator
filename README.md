@@ -17,14 +17,15 @@ options:
   -h, --help            show this help message and exit
 ```
 ```
-usage: python -m vapor_generator compress [-h] input output
+usage: python -m vapor_generator compress [-h] [-O] input output
 
 positional arguments:
-  input       The input image file
-  output      The output data file
+  input           The input image file
+  output          The output data file
 
 options:
-  -h, --help  show this help message and exit
+  -h, --help      show this help message and exit
+  -O, --optimize  Enables some tricks to reduce output size
 ```
 ```
 usage: python -m vapor_generator decompress [-h] input output
