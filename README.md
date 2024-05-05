@@ -37,5 +37,17 @@ options:
   -h, --help  show this help message and exit
 ```
 
+## Accuracy
+This compressor might emit data that is slightly different than whichever compressor Toby came up with (error margin wildly varies),
+but if you manually replace `~` at the end with `~~~`, it usually should be close enough to be
+indistinguishable from the original data.
+
+So far I don't see this actually causing errors in decompression, neither with our own decompressor
+nor with the original decompressor.
+`test_data/allofthem.py` is an accuracy test, you can get a glimpse of this compressor's accuracy
+by running that.
+
+Feel free raise an Issue if this gets problematic for you.
+
 ## License
 [MIT License](LICENSE)

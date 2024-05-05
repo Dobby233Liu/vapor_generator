@@ -20,6 +20,7 @@ for i, vapor in enumerate(allvapor):
             continue
         print(f"{i} is not the same")
         print([li for li in difflib.ndiff(vapor.decode("utf-8"), recom.decode("utf-8")) if not li.startswith(" ")])
+        print(len(vapor), len(recom))
         with vaporizer.decompress(recom) as imx:
             imx.save(os.path.join(mydir, f"allofthem/{i}_r.png"))
             with PIL.ImageChops.difference(im, imx) as imd:
