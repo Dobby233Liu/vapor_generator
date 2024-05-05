@@ -60,8 +60,9 @@ def _compress(im: PIL.Image.Image, optimize=False):
                 block_type = this_block_type
                 block_width = 0
             block_width += 1
-        # skip final block if its going to be skipped anyway
-        if not optimize or block_type == _DustBlockType.White:
+        assert block_type != None
+        # skip final block if its black, which is going to be skipped anyway
+        if not optimize or block_type != _DustBlockType.Black:
             if block := make_block():
                 yield block
 
