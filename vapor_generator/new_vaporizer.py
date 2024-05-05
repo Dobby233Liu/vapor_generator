@@ -39,9 +39,9 @@ class _DustBlockType(enum.Enum):
 
 
 def _compress(im: PIL.Image.Image):
-    _im = im.convert("1")
+    assert im.mode == "1"
 
-    for line in range(_im.height):
+    for line in range(im.height):
         block_type = None
         block_width = 0
         def make_block():
@@ -52,12 +52,12 @@ def _compress(im: PIL.Image.Image):
                 case _DustBlockType.White:
                     return make_white_code(block_width)
 
-        for x in range(_im.width):
-            pixel = _im.getpixel((x, line))
+        for x in range(im.width):
+            pixel = im.getpixel((x, line))
             this_block_type = _DustBlockType.Black if pixel == 0 else _DustBlockType.White
             if block_type is None:
                 block_type = this_block_type
-            if block_type != this_block_type:
+            elif block_type != this_block_type:
                 if block := make_block():
                     yield block
                 block_type = this_block_type
@@ -72,7 +72,7 @@ def _compress(im: PIL.Image.Image):
 
 def compress(im: PIL.Image.Image):
     data_io = io.BytesIO()
-    for chunk in _compress(im):
+    for chunk in _compress(im.convert("1")):
         data_io.write(chunk)
     return data_io.getvalue()
 
