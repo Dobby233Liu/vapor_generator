@@ -32,7 +32,7 @@ TERMINATE_DATA = b'~'
 
 class _DustParticleType(enum.IntEnum):
     Black = 0
-    White = 1
+    White = 0xFF
 
 
 def _compress(im: PIL.Image.Image, optimize=False):
@@ -78,7 +78,7 @@ def _compress(im: PIL.Image.Image, optimize=False):
 
 def compress(im: PIL.Image.Image, *args, optimize=False, **kwargs):
     data_io = io.BytesIO()
-    for chunk in _compress(im.convert("1"), *args, optimize=optimize, **kwargs):
+    for chunk in _compress(PIL.ImageOps.grayscale(im).convert("1"), *args, optimize=optimize, **kwargs):
         data_io.write(chunk)
     return data_io.getvalue()
 
