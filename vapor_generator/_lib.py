@@ -16,13 +16,13 @@ def make_code_seq(start: int, size: int, max_size: int):
 
 
 BLACK_START = b'U'[0]
-BLACK_MAX_SIZE = 36
+BLACK_MAX_SIZE = b'y'[0] - BLACK_START
 def make_black_code(size: int):
     return make_code_seq(BLACK_START, size, BLACK_MAX_SIZE)
 BLACK_END = make_black_code(BLACK_MAX_SIZE)[0]
 
 WHITE_START = b'('[0]
-WHITE_MAX_SIZE = 42
+WHITE_MAX_SIZE = b'R'[0] - WHITE_START
 def make_white_code(size: int):
     return make_code_seq(WHITE_START, size, WHITE_MAX_SIZE)
 WHITE_END = make_white_code(WHITE_MAX_SIZE)[0]

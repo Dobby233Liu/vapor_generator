@@ -20,12 +20,12 @@ repeat (4)
         code = ord(string_char_at(data, pos))
 
         var part_width = 0
-        if (code >= ord("U") && code <= ord("U") + 36)
+        if (code >= ord("U") && code <= ord("y"))
         { // black part, just skip over it
             part_width = code - ord("U")
             line_x += part_width * scale
         }
-        else if (code >= ord("(") && code <= ord("(") + 42)
+        else if (code >= ord("(") && code <= ord("R"))
         { // white part
             part_width = code - ord("(")
             if (wd > 120)
