@@ -47,7 +47,8 @@ indistinguishable from the original data.
 So far I don't see this actually causing errors in decompression, neither with our own decompressor
 nor with the original decompressor.
 In fact, we occasionally seem to generate smaller - more "efficiently compressed" - data!
-(It's not like this format is efficient anyway.) 
+(It's not like this format is efficient anyway. By the way, try `-O` if you want to
+squeeze a few bytes out of it.)
 `test_data/allofthem.py` is an accuracy test, you can get a glimpse of this compressor's accuracy
 by running that.
 
