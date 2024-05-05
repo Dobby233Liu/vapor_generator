@@ -11,24 +11,24 @@ def break_into_chunks(size: int, max_size: int):
     if size > 0:
         yield size
 
-def make_code_seq(start: bytes, size: int, max_size: int):
+def make_code_seq(start: int, size: int, max_size: int):
     ret = b''
     for i in break_into_chunks(size, max_size):
-        ret += bytes([start[0] + i])
+        ret += bytes([start + i])
     return ret
 
 
-BLACK_START = b'U'
+BLACK_START = b'U'[0]
 BLACK_MAX_SIZE = 36
 def make_black_code(size: int):
     return make_code_seq(BLACK_START, size, BLACK_MAX_SIZE)
-BLACK_END = make_black_code(BLACK_MAX_SIZE)
+BLACK_END = make_black_code(BLACK_MAX_SIZE)[0]
 
-WHITE_START = b'('
+WHITE_START = b'('[0]
 WHITE_MAX_SIZE = 42
 def make_white_code(size: int):
     return make_code_seq(WHITE_START, size, WHITE_MAX_SIZE)
-WHITE_END = make_white_code(WHITE_MAX_SIZE)
+WHITE_END = make_white_code(WHITE_MAX_SIZE)[0]
 
 TERMINATE_LINE = b'}'
 TERMINATE_DATA = b'~'
@@ -79,14 +79,14 @@ def compress(im: PIL.Image.Image):
 
 def _decompress(data: io.BytesIO):
     line = []
-    while (char := data.read(1)) and char != TERMINATE_DATA:
+    while (char := data.read(1)[0]) and char != TERMINATE_DATA[0]:
         if char >= BLACK_START and char <= BLACK_END:
-            for _ in range(char[0] - BLACK_START[0]):
+            for _ in range(char - BLACK_START):
                 line.append(0)
         elif char >= WHITE_START and char <= WHITE_END:
-            for _ in range(char[0] - WHITE_START[0]):
+            for _ in range(char - WHITE_START):
                 line.append(1)
-        elif char == TERMINATE_LINE:
+        elif char == TERMINATE_LINE[0]:
             yield line
             line = []
         else:
