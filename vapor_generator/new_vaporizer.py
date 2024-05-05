@@ -74,19 +74,18 @@ def compress(im: PIL.Image.Image):
 
 def _decompress_pixels(data: io.BytesIO):
     while (char := data.read(1)) != TERMINATE_DATA:
-        def gen_line():
-            nonlocal char
-            while char != TERMINATE_LINE:
-                if char >= BLACK_START and char <= BLACK_END:
-                    for _ in range(char[0] - BLACK_START[0]):
-                        yield 0
-                elif char >= WHITE_START and char <= WHITE_END:
-                    for _ in range(char[0] - WHITE_START[0]):
-                        yield 1
-                else:
-                    raise ValueError("Invalid character")
-                char = data.read(1)
-        yield tuple(gen_line())
+        line = []
+        while char != TERMINATE_LINE:
+            if char >= BLACK_START and char <= BLACK_END:
+                for _ in range(char[0] - BLACK_START[0]):
+                    line.append(0)
+            elif char >= WHITE_START and char <= WHITE_END:
+                for _ in range(char[0] - WHITE_START[0]):
+                    line.append(1)
+            else:
+                raise ValueError("Invalid character")
+            char = data.read(1)
+        yield line
 
 def decompress(data: io.BytesIO):
     result_pixels = list(_decompress_pixels(data))
