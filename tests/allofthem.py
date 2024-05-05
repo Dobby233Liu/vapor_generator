@@ -38,4 +38,4 @@ for i, vapor in enumerate(allvapor):
                 if imd.getbbox():
                     imd.save(os.path.join(mydir, f"allofthem/{i}_d.png"))
                 else:
-                    print(f"pixel-perfect according to our decompressor")
+                    print(f"no diff in both decompression output according to PIL")
