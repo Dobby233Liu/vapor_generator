@@ -76,9 +76,10 @@ def _compress(im: PIL.Image.Image, optimize=False):
 
     yield TERMINATE_DATA
 
-def compress(im: PIL.Image.Image, *args, optimize=False, **kwargs):
+def compress(im: PIL.Image.Image, optimize=False):
     data_io = io.BytesIO()
-    for chunk in _compress(PIL.ImageOps.grayscale(im).convert("1"), *args, optimize=optimize, **kwargs):
+    im_gray = PIL.ImageOps.grayscale(im).convert("1")
+    for chunk in _compress(im_gray, optimize=optimize):
         data_io.write(chunk)
     return data_io.getvalue()
 
