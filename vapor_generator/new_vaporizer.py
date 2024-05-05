@@ -4,6 +4,9 @@ import itertools
 import io
 
 
+AGGRESSIVE_OPTIMIZATIONS = False
+
+
 def break_into_chunks(size: int, max_size: int):
     while size > max_size:
         yield max_size
@@ -63,8 +66,10 @@ def _compress(im: PIL.Image.Image):
                 block_type = this_block_type
                 block_width = 0
             block_width += 1
-        if block := make_block():
-            yield block
+        # skip final block if its going to be skipped anyway
+        if not AGGRESSIVE_OPTIMIZATIONS or block_type == _DustBlockType.White:
+            if block := make_block():
+                yield block
 
         yield TERMINATE_LINE
 
@@ -77,7 +82,7 @@ def compress(im: PIL.Image.Image):
     return data_io.getvalue()
 
 
-def _decompress(data: io.BytesIO):
+def _decompress_to_pixels(data: io.BytesIO):
     line = []
     while (char := data.read(1)[0]) and char != TERMINATE_DATA[0]:
         if char >= BLACK_START and char <= BLACK_END:
@@ -97,11 +102,15 @@ def _decompress(data: io.BytesIO):
 def decompress(data: bytes|io.BytesIO):
     if isinstance(data, bytes):
         data = io.BytesIO(data)
-    result_pixels = list(_decompress(data))
+    result_pixels = list(_decompress_to_pixels(data))
 
     width = max(len(line) for line in result_pixels)
     height = len(result_pixels)
     assert width > 0 and height > 0
+
+    for i, line in enumerate(result_pixels):
+        if len(line) < width:
+            result_pixels[i] = line + [0] * (width - len(line))
 
     result = PIL.Image.new("1", (width, height), 0)
     result.putdata(tuple(itertools.chain(*result_pixels)))
