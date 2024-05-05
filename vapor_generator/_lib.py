@@ -83,15 +83,13 @@ def compress(im: PIL.Image.Image, *args, optimize=False, **kwargs):
     return data_io.getvalue()
 
 
-def _decompress_to_pixels(data: io.BytesIO):
+def _decompress_to_particles(data: io.BytesIO):
     line = []
     while (char := data.read(1)[0]) and char != TERMINATE_DATA[0]:
         if char >= BLACK_START and char <= BLACK_END:
-            for _ in range(char - BLACK_START):
-                line.append(0)
+            line.append((_DustParticleType.Black, char - BLACK_START))
         elif char >= WHITE_START and char <= WHITE_END:
-            for _ in range(char - WHITE_START):
-                line.append(1)
+            line.append((_DustParticleType.White, char - WHITE_START))
         elif char == TERMINATE_LINE[0]:
             yield line
             line = []
@@ -99,6 +97,13 @@ def _decompress_to_pixels(data: io.BytesIO):
             raise ValueError("Invalid character")
     if len(line) > 0:
         yield line
+
+def _decompress_to_pixels(data: io.BytesIO):
+    for line_parts in _decompress_to_particles(data):
+        line_pixels = []
+        for (part_type, part_width) in line_parts:
+            line_pixels.extend([part_type] * part_width)
+        yield line_pixels
 
 def decompress(data: bytes|io.BytesIO):
     if isinstance(data, bytes):
