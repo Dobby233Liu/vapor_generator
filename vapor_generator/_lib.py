@@ -112,3 +112,10 @@ def decompress(data: bytes|io.BytesIO):
     result = PIL.Image.new("1", (width, height), 0)
     result.putdata(tuple(itertools.chain(*result_pixels)))
     return result
+
+
+# TODO: more?
+__all__ = [
+    "compress",
+    "decompress",
+]

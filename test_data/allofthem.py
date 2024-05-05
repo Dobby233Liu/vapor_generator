@@ -1,4 +1,4 @@
-import vapor_generator.new_vaporizer as vaporizer
+import vapor_generator as vaporizer
 import os.path
 import io
 import PIL.ImageChops
