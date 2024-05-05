@@ -12,10 +12,7 @@ def break_into_chunks(size: int, max_size: int):
         yield size
 
 def make_code_seq(start: int, size: int, max_size: int):
-    ret = b''
-    for i in break_into_chunks(size, max_size):
-        ret += bytes([start + i])
-    return ret
+    return bytes([start + i for i in break_into_chunks(size, max_size)])
 
 
 BLACK_START = b'U'[0]
