@@ -37,8 +37,10 @@ class _DustParticleType(enum.IntEnum):
 
 def _compress(im: PIL.Image.Image, optimize=False):
     assert im.mode == "1"
+    line_no = 0
 
     for line in range(im.height):
+        line_no += 1
         part_type = None
         part_width = 0
 
@@ -72,7 +74,8 @@ def _compress(im: PIL.Image.Image, optimize=False):
             if part := make_part():
                 yield part
 
-        yield TERMINATE_LINE
+        if not optimize or line_no != im.height:
+            yield TERMINATE_LINE
 
     yield TERMINATE_DATA
 
