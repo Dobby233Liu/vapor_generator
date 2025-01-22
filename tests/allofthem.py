@@ -31,7 +31,7 @@ for i, vapor in enumerate(allvapor):
             continue
         print(f"{i} is not the same")
         #print([li for li in difflib.ndiff(vapor.decode("utf-8"), recom.decode("utf-8")) if not li.startswith(" ")])
-        print(f"{len(vapor)} vs {len(recom)} (-{(1 - len(recom) / len(vapor)) * 100:.2f}%)")
+        print(f"{len(vapor)} vs {len(recom)} ({-(1 - len(recom) / len(vapor)) * 100:.2f}%)")
         with open(os.path.join(mydir, f"allofthem/{i:02}_r.bin"), "wb") as f:
             f.write(recom)
         with vaporizer.decompress(recom) as imx:
