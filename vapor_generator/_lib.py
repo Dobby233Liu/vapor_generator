@@ -58,6 +58,15 @@ class _DustParticleType(enum.IntEnum):
     Black = 0
     White = 0xFF
 
+def _make_part(type: _DustParticleType, width: int, optimize: bool) -> bytes:
+    match type:
+        case _DustParticleType.Black:
+            return make_black_code(width, optimize)
+        case _DustParticleType.White:
+            return make_white_code(width, optimize)
+        case _:
+            assert False
+
 
 def _compress(im: PIL.Image.Image, optimize=False) -> Generator[bytes, None, None]:
     assert im.mode == "1"
@@ -67,22 +76,12 @@ def _compress(im: PIL.Image.Image, optimize=False) -> Generator[bytes, None, Non
         part_type = None
         part_width = 0
 
-        def make_part():
-            nonlocal part_type
-            match part_type:
-                case _DustParticleType.Black:
-                    return make_black_code(part_width, optimize)
-                case _DustParticleType.White:
-                    return make_white_code(part_width, optimize)
-                case _:
-                    assert False
-
         for x in range(im.width):
             part_type_here = im.getpixel((x, line))
             assert part_type_here in _DustParticleType
 
             if part_type is not None and part_type != part_type_here:
-                yield make_part()
+                yield _make_part(part_type, part_width, optimize)
                 part_width = 0
             part_type = part_type_here
             part_width += 1
@@ -91,7 +90,7 @@ def _compress(im: PIL.Image.Image, optimize=False) -> Generator[bytes, None, Non
         # drop the last particle if its black; that's gonna be skipped by the
         # vanilla vaporizer anyway
         if not optimize or part_type != _DustParticleType.Black:
-            yield make_part()
+            yield _make_part(part_type, part_width, optimize)
 
         # For the last line, TERMINATE_DATA is enough to make the read loop stop
         if not optimize or line != (im.height - 1):
