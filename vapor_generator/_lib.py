@@ -62,8 +62,7 @@ def _compress(im: PIL.Image.Image, optimize=False):
             if part_type is None:
                 part_type = part_type_here
             elif part_type != part_type_here:
-                if part := make_part():
-                    yield part
+                yield make_part()
                 part_type = part_type_here
                 part_width = 0
             part_width += 1
@@ -72,8 +71,7 @@ def _compress(im: PIL.Image.Image, optimize=False):
         # drop the last particle if its black; that's gonna be skipped by the
         # vanilla vaporizer anyway
         if not optimize or part_type != _DustParticleType.Black:
-            if part := make_part():
-                yield part
+            yield make_part()
 
         if not optimize or line != (im.height - 1):
             yield TERMINATE_LINE
