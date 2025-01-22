@@ -1,12 +1,14 @@
-import vapor_generator as vaporizer
+import sys
 import os.path
+mydir = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(mydir + "/..")
+
+import vapor_generator as vaporizer
 import io
 import PIL.ImageChops
 import difflib
 import shutil
 import sys
-
-mydir = os.path.dirname(os.path.realpath(__file__))
 
 allvapor = []
 with open(os.path.join(mydir, "allofthem.txt"), "r", encoding="utf-8") as all_dat:
@@ -23,8 +25,8 @@ for i, vapor in enumerate(allvapor):
     with open(os.path.join(mydir, f"allofthem/{i:02}.bin"), "wb") as f:
         f.write(vapor)
     with vaporizer.decompress(vapor) as im:
-        im.save(os.path.join(mydir, f"allofthem/{i}.png"))
-        recom = vaporizer.compress(im, optimize=optimize) + (not optimize and b'~~' or b'')
+        im.save(os.path.join(mydir, f"allofthem/{i:02}.png"))
+        recom = vaporizer.compress(im, optimize=optimize)
         if recom == vapor:
             continue
         print(f"{i} is not the same")
@@ -33,9 +35,9 @@ for i, vapor in enumerate(allvapor):
         with open(os.path.join(mydir, f"allofthem/{i:02}_r.bin"), "wb") as f:
             f.write(recom)
         with vaporizer.decompress(recom) as imx:
-            imx.save(os.path.join(mydir, f"allofthem/{i}_r.png"))
+            imx.save(os.path.join(mydir, f"allofthem/{i:02}_r.png"))
             with PIL.ImageChops.difference(im, imx) as imd:
                 if imd.getbbox():
-                    imd.save(os.path.join(mydir, f"allofthem/{i}_d.png"))
+                    imd.save(os.path.join(mydir, f"allofthem/{i:02}_d.png"))
                 else:
                     print(f"no diff in both decompression output according to PIL")
