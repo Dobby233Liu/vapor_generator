@@ -99,6 +99,11 @@ def _decompress_to_particles(data: io.BytesIO):
         # There shouldn't be any issues using the bigger white range, I THINK?
         elif char >= WHITE_START and char <= WHITE_END:
             line.append((_DustParticleType.White, char - WHITE_START))
+        elif char == BLACK_START - 1 or char == WHITE_START - 1:
+            # These technically aren't invalid (handled by Undertale) but would imply
+            # -1 length!?
+            # Toby code sucks, let's just ignore this
+            pass
         elif char == TERMINATE_LINE[0]:
             yield line
             line = []
