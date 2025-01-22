@@ -24,7 +24,7 @@ def break_into_chunks(size: int, max_size: int) -> Generator[int, None, None]:
 
 def make_code_seq(start: int, size: int, max_size: int) -> bytes:
     """
-    Makes a sequence of bytes starting at start and ending at start + size
+    Makes a sequence of bytes representing the given size
     """
 
     if size < 0:
