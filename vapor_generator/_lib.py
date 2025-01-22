@@ -81,12 +81,10 @@ def _compress(im: PIL.Image.Image, optimize=False) -> Generator[bytes, None, Non
             part_type_here = im.getpixel((x, line))
             assert part_type_here in _DustParticleType
 
-            if part_type is None:
-                part_type = part_type_here
-            elif part_type != part_type_here:
+            if part_type is not None and part_type != part_type_here:
                 yield make_part()
-                part_type = part_type_here
                 part_width = 0
+            part_type = part_type_here
             part_width += 1
 
         assert part_type != None
@@ -127,7 +125,7 @@ def _decompress_to_particles(data: io.BytesIO) -> Generator[List[Tuple[_DustPart
             # These technically aren't invalid (handled by Undertale), but would imply
             # -1 length!?
             # Toby code sucks, let's just ignore this
-            pass
+            continue
         elif char == TERMINATE_LINE[0]:
             yield line
             line = []
