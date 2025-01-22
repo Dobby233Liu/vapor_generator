@@ -17,18 +17,21 @@ def make_code_seq(start: int, size: int, max_size: int):
 
 BLACK_START = b'U'[0]
 BLACK_MAX_SIZE = b'y'[0] - BLACK_START
-def make_black_code(size: int):
+def make_black_code(size: int, optimize: bool = False):
     return make_code_seq(BLACK_START, size, BLACK_MAX_SIZE)
-BLACK_END = make_black_code(BLACK_MAX_SIZE)[0]
+BLACK_END = make_black_code(BLACK_MAX_SIZE, True)[0]
 
 WHITE_START = b'('[0]
 WHITE_MAX_SIZE = b'R'[0] - WHITE_START
-def make_white_code(size: int):
-    return make_code_seq(WHITE_START, size, WHITE_MAX_SIZE)
-WHITE_END = make_white_code(WHITE_MAX_SIZE)[0]
+# Apparently Toby's compressor doesn't support the full range of white codes
+WHITE_MAX_SIZE_TOBY = b'L'[0] - WHITE_START
+def make_white_code(size: int, optimize: bool = False):
+    return make_code_seq(WHITE_START, size, WHITE_MAX_SIZE if optimize else WHITE_MAX_SIZE_TOBY)
+WHITE_END = make_white_code(WHITE_MAX_SIZE, True)[0]
 
 TERMINATE_LINE = b'}'
 TERMINATE_DATA = b'~'
+TERMINATE_DATA_TOBY = b'~~~'
 
 class _DustParticleType(enum.IntEnum):
     Black = 0
@@ -46,9 +49,9 @@ def _compress(im: PIL.Image.Image, optimize=False):
             nonlocal part_type
             match part_type:
                 case _DustParticleType.Black:
-                    return make_black_code(part_width)
+                    return make_black_code(part_width, optimize)
                 case _DustParticleType.White:
-                    return make_white_code(part_width)
+                    return make_white_code(part_width, optimize)
                 case _:
                     assert False
 
@@ -72,9 +75,13 @@ def _compress(im: PIL.Image.Image, optimize=False):
             if part := make_part():
                 yield part
 
-        yield TERMINATE_LINE
+        if not optimize or line != (im.height - 1):
+            yield TERMINATE_LINE
 
-    yield TERMINATE_DATA
+    if not optimize:
+        yield TERMINATE_DATA_TOBY
+    else:
+        yield TERMINATE_DATA
 
 def compress(im: PIL.Image.Image, optimize=False):
     data_io = io.BytesIO()
@@ -85,10 +92,13 @@ def compress(im: PIL.Image.Image, optimize=False):
 
 
 def _decompress_to_particles(data: io.BytesIO):
+    if isinstance(data, bytes):
+        data = io.BytesIO(data)
     line = []
     while (char := data.read(1)[0]) and char != TERMINATE_DATA[0]:
         if char >= BLACK_START and char <= BLACK_END:
             line.append((_DustParticleType.Black, char - BLACK_START))
+        # There shouldn't be any issues using the bigger white range, I THINK?
         elif char >= WHITE_START and char <= WHITE_END:
             line.append((_DustParticleType.White, char - WHITE_START))
         elif char == TERMINATE_LINE[0]:
@@ -107,8 +117,6 @@ def _decompress_to_pixels(data: io.BytesIO):
         yield line_pixels
 
 def decompress(data: bytes|io.BytesIO):
-    if isinstance(data, bytes):
-        data = io.BytesIO(data)
     result_pixels = list(_decompress_to_pixels(data))
 
     width = max(len(line) for line in result_pixels)
